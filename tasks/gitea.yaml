@@ -1,0 +1,116 @@
+---
+- name: Enable autostart gitea server
+  ansible.builtin.service:
+    name: gitea
+    state: started
+    enabled: yes
+
+- name: Generate and set fact INTERNAL_TOKEN
+  block:
+    - name: Delete INTERNAL_TOKEN
+      ansible.builtin.file:
+        path: '/etc/gitea/internal_token'
+        state: absent
+      when: "('rekey_internal' in ansible_run_tags) or ('rekey' in ansible_run_tags)"
+    - name: Generate INTERNAL_TOKEN
+      ansible.builtin.shell: 'umask 077 && gitea generate secret INTERNAL_TOKEN > /etc/gitea/internal_token'
+      args:
+        creates: '/etc/gitea/internal_token'
+    - name: Read INTERNAL_TOKEN
+      ansible.builtin.slurp:
+        src: '/etc/gitea/internal_token'
+      register: internal_token
+    - name: Set internal_token as a fact
+      ansible.builtin.set_fact:
+        gitea_security_internal_token: "{{ internal_token['content'] | b64decode }}"
+  when: gitea_security_internal_token | length == 0
+  notify: 
+    - read_lfs_secret
+    - read_oauth2_secret
+  tags: 
+    - rekey_internal
+    - rekey
+
+- name: Force read not modified secrets (OAuth2 and LFS)
+  meta: flush_handlers
+  tags: 
+    - rekey_internal
+
+- name: Generate and set fact OAuth2 JWT_SECRET
+  block:
+    - name: Delete OAuth2 JWT_SECRET
+      ansible.builtin.file:
+        path: '/etc/gitea/oauth_jwt_secret'
+        state: absent
+      when: "('rekey_oauth2' in ansible_run_tags) or ('rekey' in ansible_run_tags)"
+    - name: Generate OAuth2 JWT_SECRET
+      ansible.builtin.shell: 'umask 077 && gitea generate secret JWT_SECRET > /etc/gitea/oauth_jwt_secret'
+      args:
+        creates: '/etc/gitea/oauth_jwt_secret'
+    - name: Read OAuth2 JWT_SECRET
+      ansible.builtin.slurp:
+        src: '/etc/gitea/oauth_jwt_secret'
+      register: oauth_jwt_secret
+    - name: Set gitea_oauth2_jwt_secret as a fact
+      ansible.builtin.set_fact:
+        gitea_oauth2_jwt_secret: "{{ oauth_jwt_secret['content'] | b64decode }}"
+  when: gitea_oauth2_jwt_secret | length == 0
+  notify: 
+    - read_internal_token
+    - read_lfs_secret
+  tags: 
+    - rekey_oauth2
+    - rekey
+
+- name: Force read not modified secrets (INTERNAL and LFS)
+  meta: flush_handlers
+  tags: 
+    - rekey_oauth2
+
+- name: Generate and set fact LFS JWT_SECRET
+  block:
+    - name: Delete LFS JWT_SECRET
+      ansible.builtin.file:
+        path: '/etc/gitea/lfs_jwt_secret'
+        state: absent
+      when: "('rekey_lfs' in ansible_run_tags) or
+             ('rekey' in ansible_run_tags)"
+    - name: Generate LFS JWT_SECRET
+      ansible.builtin.shell: 'umask 077 && gitea generate secret JWT_SECRET > /etc/gitea/lfs_jwt_secret'
+      args:
+        creates: '/etc/gitea/lfs_jwt_secret'
+    - name: Read LFS JWT_SECRET from file
+      ansible.builtin.slurp:
+        src: '/etc/gitea/lfs_jwt_secret'
+      register: lfs_jwt_secret
+    - name: Set fact lfs_jwt_secret
+      ansible.builtin.set_fact:
+        gitea_server_lfs_jwt_secret: "{{ lfs_jwt_secret['content'] | b64decode }}"
+  when: gitea_server_lfs_jwt_secret | length == 0
+  notify:
+    - read_internal_token
+    - read_oauth2_secret
+  tags: 
+    - rekey_lfs
+    - rekey
+
+- name: Force read not modified secrets (INTERNAL and OAuth2)
+  meta: flush_handlers
+  tags: 
+    - rekey_lfs
+
+- name: Render gitea config
+  ansible.builtin.template:
+    src: etc/gitea/app.ini.j2
+    dest: /etc/gitea/app.ini
+    owner: gitea
+    group: www-data
+    mode: 0600
+  notify: restart_gitea
+  no_log: '{{ ansible_verbosity < 3 }}'
+  tags:
+    - rekey_internal
+    - rekey_oauth2
+    - rekey_lfs
+    - rekey
+

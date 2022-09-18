@@ -1,0 +1,16 @@
+---
+- name: Install gitea
+  ansible.builtin.apk:
+    name: gitea
+    update_cache: yes
+    state: present
+
+- name: Install mariadb
+  ansible.builtin.apk:
+    name: 
+    - mariadb
+    - mariadb-client
+    - py3-mysqlclient
+    update_cache: yes
+    state: present
+

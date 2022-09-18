@@ -1,0 +1,82 @@
+---
+alpine_version: 'v3.16'
+alpine_repo_mirror: 'https://mirror.yandex.ru/mirrors/alpine'
+mysql_root_pass: 'Sup3rSecr3tPa$$worD'
+mysql_data_path: '/var/lib/mysql'
+
+gitea_user: 'gitea'
+gitea_run_mode: 'prod'
+gitea_app_name: 'Gitea: Git with cup of tea'
+
+#[repository]
+gitea_repository_root_path: '/var/lib/gitea/git'
+gitea_repository_script_type: 'sh'
+
+#[server]
+gitea_server_static_root_path: '/usr/share/webapps/gitea'
+gitea_server_app_data_path: '/var/lib/gitea/data'
+gitea_server_lfs_start_server: 'true'
+gitea_server_lfs_jwt_secret: '' 
+gitea_server_ssh_domain: 'localhost'
+gitea_server_domain: 'localhost'
+gitea_server_http_port: '3000'
+gitea_server_root_url: 'http://localhost:3000/'
+gitea_server_disable_ssh: 'false'
+gitea_server_ssh_port: '22'
+gitea_server_lfs_content_path: '/var/lib/gitea/data/lfs'
+gitea_server_offline_mode: 'false'
+
+#[database]
+gitea_database_db_type: 'mysql'
+gitea_database_host: '/var/run/mysqld/mysqld.sock'
+gitea_database_name: 'gitea'
+gitea_database_user: 'gitea_user'
+gitea_database_passwd: 'Top$3cretP@ss'
+gitea_database_schema: ''
+gitea_database_ssl_mode: 'disable'
+gitea_database_charset: 'utf8mb4'
+gitea_database_db_collation: 'utf8mb4_unicode_ci'
+gitea_database_path: '/var/lib/gitea/data/'
+gitea_database_log_sql: 'false'
+
+
+#[session]
+gitea_session_provider: 'file'
+
+#[log]
+gitea_log_root_path: '/var/log/gitea'
+gitea_log_mode: 'console'
+gitea_log_level: 'info'
+gitea_log_router: 'console'
+
+#[mailer]
+gitea_mailer_enabled: 'false'
+
+#[service]
+gitea_service_register_email_confirm: 'false'
+gitea_service_enable_notify_mail: 'false'
+gitea_service_disable_registration: 'false'
+gitea_service_allow_only_external_registration: 'false'
+gitea_service_enable_captcha: 'false'
+gitea_service_require_signin_view: 'false'
+gitea_service_default_keep_email_private: 'false'
+gitea_service_default_allow_create_organization: 'true'
+gitea_service_default_enable_timetracking: 'true'
+gitea_service_no_reply_address: 'noreply.localhost'
+
+#[picture]
+gitea_picture_disable_gravatar: 'true'
+gitea_picture_enable_federated_avatar: 'false'
+
+#[openid]
+gitea_openid_enable_openid_signin: 'false'
+gitea_openid_enable_openid_signup: 'false'
+
+#[security]
+gitea_security_install_lock: 'true'
+gitea_security_internal_token: ''
+gitea_security_password_hash_algo: 'pbkdf2'
+
+#[oauth2]
+gitea_oauth2_enabled: false
+gitea_oauth2_jwt_secret: ''

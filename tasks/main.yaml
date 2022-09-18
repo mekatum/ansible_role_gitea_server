@@ -1,0 +1,10 @@
+---
+- name: Render repos
+  import_tasks: repos.yaml
+- name: Install packages
+  import_tasks: packages.yaml
+- name: Config mariadb
+  import_tasks: mariadb.yaml
+- name: Config gitea
+  import_tasks: gitea.yaml
+

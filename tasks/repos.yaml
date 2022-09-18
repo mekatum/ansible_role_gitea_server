@@ -1,0 +1,9 @@
+---
+- name: Render repos
+  ansible.builtin.template:
+    src: etc/apk/repositories.j2
+    dest: /etc/apk/repositories
+    owner: root
+    group: root
+    mode: '0644'
+

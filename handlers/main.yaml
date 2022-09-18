@@ -1,0 +1,59 @@
+---
+- name: Read INTERNAL_TOKEN
+  ansible.builtin.slurp:
+    src: '/etc/gitea/internal_token'
+  register: internal_token
+  listen: read_internal_token
+- name: Set internal_token as a fact
+  ansible.builtin.set_fact:
+    gitea_security_internal_token: "{{ internal_token['content'] | b64decode }}"
+  listen: read_internal_token
+
+- name: Read OAuth2 JWT_SECRET
+  ansible.builtin.slurp:
+    src: '/etc/gitea/oauth_jwt_secret'
+  register: oauth_jwt_secret
+  listen: read_oauth2_secret
+- name: Set gitea_oauth2_jwt_secret as a fact
+  ansible.builtin.set_fact:
+    gitea_oauth2_jwt_secret: "{{ oauth_jwt_secret['content'] | b64decode }}"
+  listen: read_oauth2_secret
+
+- name: Read LFS JWT_SECRET from file
+  ansible.builtin.slurp:
+    src: '/etc/gitea/lfs_jwt_secret'
+  register: lfs_jwt_secret
+  listen: read_lfs_secret
+- name: Set fact lfs_jwt_secret
+  ansible.builtin.set_fact:
+    gitea_server_lfs_jwt_secret: "{{ lfs_jwt_secret['content'] | b64decode }}"
+  listen: read_lfs_secret
+
+- name: Restart gitiea
+  ansible.builtin.service:
+    name: gitea
+    state: restarted
+  listen: 
+    - restart_gitea
+    - render_config
+
+- name: Removes all anonymous user accounts
+  community.mysql.mysql_user:
+    login_host: 'localhost'
+    login_user: 'root'
+    login_password: '{{ mysql_root_pass }}'
+    name: ''
+    host_all: yes
+    state: absent
+  listen: init_create_db
+
+- name: Set root password to MariaDB
+  community.mysql.mysql_user:
+    login_host: 'localhost'
+    login_user: 'root'
+    login_password: ''
+    name: 'root'
+    password: '{{ mysql_root_pass }}'
+    state: present
+  listen: init_create_db.changed
+

@@ -1,0 +1,40 @@
+---
+- name: Files in {{ mysql_data_path }} count
+  ansible.builtin.find:
+    paths: '{{ mysql_data_path }}'
+    file_type: any
+    hidden: yes
+  register: db_files_count
+
+- name: Init create DB in {{ mysql_data_path }}
+  ansible.builtin.command: "mysql_install_db --user=mysql --datadir='{{ mysql_data_path }}'"
+  when: db_files_count.matched|int == 0
+  notify: init_create_db
+
+- name: Enable autostart MariaDB server
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Create gitea DB
+  community.mysql.mysql_db:
+    login_host: 'localhost'
+    login_user: 'root'
+    login_password: '{{ mysql_root_pass }}'
+    name: '{{ gitea_database_name }}'
+    encoding: '{{ gitea_database_charset }}'
+    collation: '{{ gitea_database_db_collation }}'
+    state: present
+
+- name: Create gitea user {{ gitea_database_name }}
+  community.mysql.mysql_user:
+    name: '{{ gitea_database_user }}'
+    password: '{{ gitea_database_passwd }}'
+    host: 'localhost'
+    priv: '*.*:ALL,GRANT'
+    login_host: 'localhost'
+    login_user: 'root'
+    login_password: '{{ mysql_root_pass }}'
+    state: present
+
