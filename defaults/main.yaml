@@ -4,6 +4,9 @@ alpine_repo_mirror: 'https://mirror.yandex.ru/mirrors/alpine'
 mysql_root_pass: 'Sup3rSecr3tPa$$worD'
 mysql_data_path: '/var/lib/mysql'
 
+ssl_key: ''
+ssl_cer: ''
+
 gitea_user: 'gitea'
 gitea_run_mode: 'prod'
 gitea_app_name: 'Gitea: Git with cup of tea'
@@ -25,6 +28,8 @@ gitea_server_disable_ssh: 'false'
 gitea_server_ssh_port: '22'
 gitea_server_lfs_content_path: '/var/lib/gitea/data/lfs'
 gitea_server_offline_mode: 'false'
+gitea_server_cert_file: ''
+gitea_server_key_file: ''
 
 #[database]
 gitea_database_db_type: 'mysql'
@@ -38,7 +43,6 @@ gitea_database_charset: 'utf8mb4'
 gitea_database_db_collation: 'utf8mb4_unicode_ci'
 gitea_database_path: '/var/lib/gitea/data/'
 gitea_database_log_sql: 'false'
-
 
 #[session]
 gitea_session_provider: 'file'

@@ -99,6 +99,26 @@
   tags: 
     - rekey_lfs
 
+- name: Render SSL cert
+  ansible.builtin.template:
+    src: etc/gitea/domain_ssl.cer.j2
+    dest: /etc/gitea/ssl_cert.cer
+    owner: gitea
+    group: www-data
+    mode: 0600
+  notify: restart_gitea
+  no_log: '{{ ansible_verbosity < 3 }}'
+
+- name: Render SSL key
+  ansible.builtin.template:
+    src: etc/gitea/domain_ssl.key.j2
+    dest: /etc/gitea/ssl_cert.key
+    owner: gitea
+    group: www-data
+    mode: 0600
+  notify: restart_gitea
+  no_log: '{{ ansible_verbosity < 3 }}'
+
 - name: Render gitea config
   ansible.builtin.template:
     src: etc/gitea/app.ini.j2

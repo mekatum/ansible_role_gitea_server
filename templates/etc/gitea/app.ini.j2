@@ -32,6 +32,13 @@ LFS_START_SERVER = {{ gitea_server_lfs_start_server }}
 LFS_CONTENT_PATH = {{ gitea_server_lfs_content_path }}
 LFS_JWT_SECRET   = {{ gitea_server_lfs_jwt_secret }}
 OFFLINE_MODE     = {{ gitea_server_offline_mode }}
++{% if gitea_server_cert_file|length > 0 and gitea_server_key_file|length > 0
++and ssl_cer|length > 0 and ssl_key|length > 0 %}
++PROTOCOL         = https
++CERT_FILE        = {{ gitea_server_cert_file }}
++KEY_FILE         = {{ gitea_server_key_file }}
++REDIRECT_OTHER_PORT = true
++{% endif %}
 
 [mailer]
 ENABLED = {{ gitea_mailer_enabled }}
